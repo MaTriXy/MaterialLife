@@ -1,23 +1,24 @@
 package com.juankysoriano.materiallife.world;
 
 import android.net.Uri;
-import android.support.annotation.VisibleForTesting;
 
 import com.juankysoriano.materiallife.world.life.GameOfLife;
 import com.juankysoriano.rainbow.core.Rainbow;
+import com.juankysoriano.rainbow.core.drawing.Modes;
 import com.juankysoriano.rainbow.core.drawing.RainbowDrawer;
 import com.juankysoriano.rainbow.core.event.RainbowInputController;
 import com.juankysoriano.rainbow.core.graphics.RainbowImage;
+import com.juankysoriano.rainbow.utils.schedulers.RainbowScheduler;
+import com.juankysoriano.rainbow.utils.schedulers.RainbowSchedulers;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import androidx.annotation.VisibleForTesting;
 
 public class World extends Rainbow implements RainbowImage.LoadPictureListener {
-    private static final ExecutorService EXECUTOR = Executors.newSingleThreadExecutor();
+    private static final RainbowScheduler SCHEDULER = RainbowSchedulers.single("LoadWorld", RainbowSchedulers.Priority.MIN);
 
     @VisibleForTesting
     //CHECKSTYLE IGNORE VisibilityModifier
-    protected GameOfLife gameOfLife;
+            GameOfLife gameOfLife;
     //CHECKSTYLE END IGNORE
 
     public static World newInstance() {
@@ -35,6 +36,7 @@ public class World extends Rainbow implements RainbowImage.LoadPictureListener {
     public void onSketchSetup() {
         super.onSketchSetup();
         gameOfLife = GameOfLife.newInstance(getRainbowDrawer(), getRainbowInputController());
+        getRainbowInputController().attach(gameOfLife);
     }
 
     public void startEdition() {
@@ -50,14 +52,13 @@ public class World extends Rainbow implements RainbowImage.LoadPictureListener {
     }
 
     @Override
-    public void onDrawingStep() {
-        if (hasGameOfLife()) {
-            gameOfLife.doStep();
-        }
+    public void onStep() {
+        gameOfLife.doStep();
     }
 
-    private boolean hasGameOfLife() {
-        return gameOfLife != null;
+    @Override
+    public void onSketchDestroy() {
+        getRainbowInputController().detach();
     }
 
     public void restoreLastWorld() {
@@ -66,10 +67,10 @@ public class World extends Rainbow implements RainbowImage.LoadPictureListener {
 
     public void loadWorldFrom(final Uri image) {
         gameOfLife.clear();
-        EXECUTOR.execute(new Runnable() {
+        SCHEDULER.scheduleNow(new Runnable() {
             @Override
             public void run() {
-                getRainbowDrawer().loadImage(image, RainbowImage.LOAD_CENTER_CROP, World.this);
+                getRainbowDrawer().loadImage(image, Modes.LoadMode.LOAD_CENTER_CROP, World.this);
             }
         });
     }

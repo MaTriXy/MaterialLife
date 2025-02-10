@@ -2,7 +2,6 @@ package com.juankysoriano.materiallife.world;
 
 import android.net.Uri;
 
-import com.juankysoriano.materiallife.RobolectricMaterialLifeGradleTestRunner;
 import com.juankysoriano.materiallife.MaterialLifeTestBase;
 import com.juankysoriano.materiallife.world.life.GameOfLife;
 import com.juankysoriano.rainbow.core.drawing.RainbowDrawer;
@@ -11,14 +10,13 @@ import com.juankysoriano.rainbow.core.graphics.RainbowImage;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import static org.mockito.Mockito.verify;
 
-@RunWith(RobolectricMaterialLifeGradleTestRunner.class)
+
 public class WorldTest extends MaterialLifeTestBase {
     private static final Uri ANY_URI = null;
     private static final RainbowImage ANY_IMAGE = Mockito.mock(RainbowImage.class);
@@ -61,7 +59,7 @@ public class WorldTest extends MaterialLifeTestBase {
 
     @Test
     public void testThatWhenOnDrawingStepIsCalledThenGameOfLifeStepIsDone() {
-        world.onDrawingStep();
+        world.onStep();
 
         verify(gameOfLifeMock).doStep();
     }
